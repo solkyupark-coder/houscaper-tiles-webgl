@@ -1,6 +1,6 @@
 const ATLAS_FAMILY_DISTANCE_MM = 8000;
 // ponytail: 8000mm correctly separates atlas "neighborhoods" but still merges
-// distinct design studies that sit ~9–15m apart inside one neighborhood
+// distinct design studies that sit ~9??5m apart inside one neighborhood
 // (e.g. frame-structural left X~126k vs right X~143k). 4000mm is the ceiling
 // that keeps one study together. Upgrade path: tag studies in the Rhino export.
 const COHERENT_SUBCLUSTER_MM = 4000;
@@ -19,7 +19,7 @@ const FAMILY_METADATA = [
 
 // Default playable family is further restricted to one coherent Rhino study
 // (largest 4000mm sub-cluster, one tile per atlas origin).
-const DEFAULT_FAMILY_ID = "frame-structural";
+const DEFAULT_FAMILY_ID = "frame-light";
 
 function distance(a, b) {
   return Math.hypot(
