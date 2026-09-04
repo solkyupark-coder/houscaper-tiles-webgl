@@ -1,30 +1,38 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef } from "react";
+import { mountHouscaper } from "../houscaper-engine.js";
 
 export default function Houscaper() {
   const mountRef = useRef(null);
 
   useEffect(() => {
-    let dispose;
-    let cancelled = false;
+    const mountElement = mountRef.current;
+    if (!mountElement) return undefined;
 
-    import("../houscaper-engine.js").then(async ({ mountHouscaper }) => {
-      if (cancelled) return;
+    let active = true;
+    let cleanup = null;
+
+    (async () => {
       try {
-        const cleanup = await mountHouscaper(mountRef.current);
-        if (cancelled) cleanup();
-        else dispose = cleanup;
+        const dispose = await mountHouscaper(mountElement);
+        if (!active) {
+          dispose();
+          return;
+        }
+        cleanup = dispose;
       } catch (error) {
         console.error(error);
-        const status = mountRef.current?.querySelector("#stats");
+        if (!active) return;
+        const status = mountElement.querySelector("#stats");
         if (status) status.textContent = "Houscaper failed to start";
       }
-    });
+    })();
 
     return () => {
-      cancelled = true;
-      dispose?.();
+      active = false;
+      cleanup?.();
+      cleanup = null;
     };
   }, []);
 

@@ -11,6 +11,7 @@ import { parseRhinoObj } from "./rhino-obj.js";
 const LEVEL_HEIGHT = 0.6;
 
 export async function mountHouscaper(mountElement) {
+  const mountId = (window.__houscaperMountId = (window.__houscaperMountId || 0) + 1);
   
   // ════════════════════════════════════════════════════════════════
   //  BMC core (mirrors packages/bmc-core/src/topology.ts)
@@ -917,6 +918,8 @@ export async function mountHouscaper(mountElement) {
     renderer.dispose();
     renderer.forceContextLoss();
     renderer.domElement.remove();
-    delete window.getHouscaperState;
+    if (window.__houscaperMountId === mountId) {
+      delete window.getHouscaperState;
+    }
   };
 }
