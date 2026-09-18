@@ -900,7 +900,39 @@ export async function mountHouscaper(mountElement) {
     renderer.render(scene, camera);
   });
 
-  return () => {
+  function getSnapshot() {
+    return {
+      version: 1,
+      renderMode,
+      activeFamilyId,
+      voxels: [...voxelTypes.entries()].map(([k, type]) => {
+        const [x, y, z] = k.split(",").map(Number);
+        return { x, y, z, type };
+      }),
+    };
+  }
+
+  function loadSnapshot(data) {
+    if (!data || !Array.isArray(data.voxels)) return false;
+    voxels.clear();
+    voxelTypes.clear();
+    for (const cell of data.voxels) {
+      const k = key(cell.x, cell.y, cell.z);
+      voxels.add(k);
+      voxelTypes.set(k, cell.type ?? 1);
+    }
+    if (data.renderMode) {
+      renderMode = data.renderMode;
+      const sel = document.getElementById("renderMode");
+      if (sel) sel.value = renderMode;
+      document.getElementById("brushes").hidden = renderMode !== "architectural";
+    }
+    if (data.activeFamilyId) activeFamilyId = data.activeFamilyId;
+    refresh();
+    return true;
+  }
+
+  function dispose() {
     renderer.setAnimationLoop(null);
     listeners.abort();
     clearTimeout(flash._t);
@@ -921,5 +953,7 @@ export async function mountHouscaper(mountElement) {
     if (window.__houscaperMountId === mountId) {
       delete window.getHouscaperState;
     }
-  };
+  }
+
+  return { dispose, getSnapshot, loadSnapshot };
 }
